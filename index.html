@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+<meta charset="UTF-8">
+<title>Studio Slideshow Thumbs</title>
+
+<link rel="stylesheet" href="stylesheets/style.css">
+
+<script src="javascripts/vendor/modernizr-basic.js"></script>
+
+</head>
+
+  <body>
+
+      <div class="wrapper">
+
+        <div id="slideshow-wrapper">
+
+          <div>
+            <a href="/">
+              <p>Caption Text Here: CITY CLUB BEER</p>
+            <img src="images/beercan-image-a.jpg" alt="image 00"/>
+            </a>
+          </div>
+
+          <div>
+            <img src="images/beercan-image-b.jpg" alt="image 01"/>
+          </div>
+
+          <div>
+            <img src="images/beercan-image-c.jpg" alt="image 02"/>
+          </div>
+
+          <div>
+            <img src="images/beercan-image-d.jpg" alt="image 03"/>
+          </div>
+
+        </div> <!-- end #slideshow-wrapper -->
+
+        <div id="toggle" onclick="STUDIO.slideshow.pauseSlideshow()">Play &#9787; Pause</div>
+        <div id="next" onclick="STUDIO.slideshow.nextSlide()"></div>
+        <div id="previous" onclick="STUDIO.slideshow.prevSlide()"></div>
+
+      </div>
+
+    <script src="javascripts/studio.slideshow-thumbs.js"></script>
+
+    <script>
+      STUDIO.slideshow.initSlides("slideshow-wrapper");
+    </script>
+
+  </body>
+
+</html>

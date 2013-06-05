@@ -1,0 +1,25 @@
+// Normalize as .scss import to base. You still want Normalize to be the first import in base, just like the Compass reset
+@import "normalize";
+// @import "html5bp";
+// @import "compass/reset";
+@import "compass/css3";
+@import "compass/utilities";
+
+// @import "typography";
+// @import "color";
+
+/*
+http://paulirish.com/2012/box-sizing-border-box-ftw/
+http://css-tricks.com/box-sizing/
+apply a natural box layout model to all elements
+*/
+
+*, *:after, *:before {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+/* apply a natural box layout model to all elements */
+// * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }
+

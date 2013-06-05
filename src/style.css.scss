@@ -1,0 +1,103 @@
+@import "base";
+
+// ================================= NO-JS ================================= //
+/* The ampersand (&) selector is a Sass convention that means “this element.”
+   When this code is compiled Sass will replace all the & symbols
+   with the current selector, so you get html.no-js as the selector */
+
+html {
+  &.no-js {
+    background-color: #336699;
+
+    body {
+      background-color: #EFEFEF;
+    }
+    #slideshow-wrapper {
+      div {
+        display: block;
+        z-index: 1;
+      }
+      :first-child {
+        z-index: 2;
+      }
+    }
+    #toggle, #next, #previous {
+      display: none;
+    }
+  }
+}
+
+
+body {
+  font-family: "Helvetica Neue";
+}
+
+#slideshow-wrapper {
+  height: 380px;
+  overflow: hidden;
+  position: relative;
+  width: 380px;
+
+  div, img {
+    height: 380px;
+    position: absolute;
+    width: 380px;
+  }
+
+  div {
+    display: none;
+  }
+
+  p {
+    background-color: #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    // LOOK INTO whether or not you need the z-index on captions.
+    // z-index: 10;
+  }
+
+}
+
+
+.wrapper {
+  position: relative;
+  width: 380px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  #toggle {
+    @include border-radius(4px);
+    border: 1px solid #999;
+    cursor: pointer;
+    display: block;
+    padding: 5px;
+    text-align: center;
+  }
+
+  #next {
+    @include border-radius(4px);
+    bottom: 80px;
+    border: 1px solid #999;
+    cursor: pointer;
+    padding: 5px;
+    position: absolute;
+    right: 0;
+    z-index: 10;
+  }
+
+  #previous {
+    @include border-radius(4px);
+    bottom: 80px;
+    border: 1px solid #999;
+    cursor: pointer;
+    padding: 5px;
+    position: absolute;
+    left: 0;
+    z-index: 9;
+  }
+}
