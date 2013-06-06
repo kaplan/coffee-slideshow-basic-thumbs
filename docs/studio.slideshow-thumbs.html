@@ -1,0 +1,1417 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <title>#</title>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+  <link rel="stylesheet" media="all" href="docco.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="background"></div>
+    
+    <ul class="sections">
+        
+        
+        
+        <li id="section-1">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h1">
+                <a class="pilcrow" href="#section-1">&#182;</a>
+              </div>
+              <h1>#</h1>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>Slideshow Application with Thumbs
+Description: Basic slideshow with thumbnail images fading with controls sans library (why? idk). Just learning so this is me winging it.
+
+Neat stuff: There is also a Rake file you can run in the Terminal to start the watch on the scss and coffeescript. I'm not sure what the last parts are, I should find out more. The Rake comes from a great post, by Nick Quaranto: http://quaran.to/blog/2013/01/09/use-jekyll-scss-coffeescript-without-plugins/
+
+Dependencies: Modernizr, for js detection
+
+Version:      1.0
+Created:      2013-06-05
+Last Mod:     2013-06-06
+
+Notes: This version of the slideshow is built on the original non-thumb one ( https://github.com/kaplan/coffee-slideshow-basic ). Somewhat fewer comments as a guide for myself in this version, thought being I can always go back to the original-original for reference, which I seem to do with lots of stuff. Just like the original I'm trying to do as much plain JavaScript through learning CoffeeScript as I can, later libraries.
+
+The thumbs have a custom attribute, data-, that is pretty neat for semantic markup that you can use in your JavaScript. The ones used here are very simple, just an id for the thumb/slide that will help in setting the current image. If you look at the very bottom I have a little explaination copied from the HTML5Doctor page: http://html5doctor.com/html5-custom-data-attributes/ where I learned about these.
+
+Working on make the JavaScript unobtrusive: I started to pull out the eventhandlers from the markup, removed the onclick="STUDIO.slideshow.pauseSlideshow()" from the toggle, next and prev. Those are now in here, where they should be for the separation between structure and behavior.
+
+Next: I'd like to add some better or more clear documentation for the methods and properties and begin really eleminating and comments or console.logs. At this point it's very handy for me to watch the Browser's console log to see what the application is doing. In the end the comments don't compile into the JavaScript from CoffeeScript and I think that's one of my favorite things about CS. My JavaScript files were a mess with commented out logs and notes that I would leave out of fear of forgetting what I was doing, but it made for a very littered looking code, not at all crafsman like. Maybe it's the quality of my comments and the fact I try different snippets within before I settle on an approach.
+
+Found this on Docco, which I need to start using:
+http://jashkenas.github.io/docco/
+http://lostechies.com/derickbailey/2011/12/14/annotated-source-code-as-documentation-with-docco/</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-2">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h1">
+                <a class="pilcrow" href="#section-2">&#182;</a>
+              </div>
+              <h1>#</h1>
+<p>Using addLoadEvent instead of jQuery ready, but not sure if this is the best approach.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="title">addLoadEvent</span></span> = (func) -&gt;
+  oldonload = window.onload
+  <span class="keyword">if</span> <span class="keyword">typeof</span> window.onload <span class="keyword">isnt</span> <span class="string">'function'</span>
+    window.onload = func
+  <span class="keyword">else</span>
+    window.<span class="function"><span class="title">onload</span></span> = -&gt;
+      oldonload()
+      func()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-3">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-3">&#182;</a>
+              </div>
+              <p>Namespace the application using this with an empty object if is not null</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="property">@STUDIO</span> = <span class="property">@STUDIO</span> ? {}
+
+<span class="property">@STUDIO</span>.slideshow = <span class="keyword">do</span> -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-4">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-4">&#182;</a>
+              </div>
+              <p>private</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  slideshow = slides = photos = thumbset = thumbs = toggle = next = prev = <span class="string">"unknown"</span>
+  curImage = slideCount = totalImageCount = loadedSlideCount = <span class="number">0</span>
+  fadeInContainerTimeout = slideshowTimeout = fadeOutTimeout = <span class="literal">null</span>
+  slideshowPaused = <span class="literal">false</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-5">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-5">&#182;</a>
+              </div>
+              <p>FOR IMAGE LOADED COUNTING</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="title">onImageLoad</span></span> = (slideOrder) -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-6">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-6">&#182;</a>
+              </div>
+              <p>after each imaage is loaded make sure it&#39;s display is not &#39;none&#39;
+bc in the CSS these all start display none, which hides them before they completely load in IE</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    slides[slideOrder].style.display = <span class="string">"block"</span>;
+
+    loadedSlideCount++</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-7">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <p>console.log &quot;loading an image #{slideOrder}&quot;
+console.log &quot;loadedSlideCount is #{loadedSlideCount}&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> totalImageCount <span class="keyword">is</span> loadedSlideCount
+      console.log <span class="string">"+ ================== +"</span>
+      console.log <span class="string">"+ ALL IMAGES LOADED! +"</span>
+      console.log <span class="string">"+ ================== +"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
+              </div>
+              <p> After all the images are loaded fade up the container with: fadeInContainer()
+ Then when the container fade up is done, start the slideshow running.
+ Increase compatibility with unnamed functions</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      fadeInContainerTimeout = setTimeout(-&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-9">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-9">&#182;</a>
+              </div>
+              <p>console.log &quot;!! ALL IMAGES LOADED: FADE IN THE SLIDESHOW CONTAINER !!&quot;
+the 0 is what we&#39;re fading up from, 500 is a delay of .5 seconds</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        fadeInContainer slideshow, <span class="number">0</span>, <span class="number">500</span>)
+
+      fadeInThumbs = setTimeout(-&gt;
+        fadeInObject thumbset, <span class="number">0</span>, <span class="number">500</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <p>FOR ALL FADING INTERVAL CALLS</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="title">setOpacity</span></span> = (obj, opacity) -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>Firefox flicker fix ?
+opacity = (opacity == 100)?99.999:opacity;</p>
+<p>IE/Win</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    obj.style.filter = <span class="string">"alpha(opacity:"</span>+opacity+<span class="string">")"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>Safari&lt;1.2, Konqueror</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    obj.style.KHTMLOpacity = opacity/<span class="number">100</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>Older Mozilla and Firefox</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    obj.style.MozOpacity = opacity/<span class="number">100</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>Safari 1.2, newer Firefox and Mozilla, CSS3</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    obj.style.opacity = opacity/<span class="number">100</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>opacity = (opacity == 100)?99.999:opacity;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    obj.style.opacity = opacity / <span class="number">100</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>FADE IN for general purpose</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="title">fadeInObject</span></span> = (obj, opacity) -&gt;
+    <span class="keyword">if</span> opacity &lt;= <span class="number">100</span>
+      setOpacity(obj, opacity)
+      opacity += <span class="number">2</span>
+      fadeInObjectTimeout = setTimeout(-&gt;
+        fadeInObject obj, opacity, <span class="number">200</span>)
+    <span class="keyword">else</span>
+      clearTimeout fadeInObjectTimeout</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>console.log &#39;<strong><em> done with fadeInObject </em></strong>&#39;</p>
+<p>FOR INITAL WRAPPER FADE UP INTERVAL</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="title">fadeInContainer</span></span> = (obj, opacity) -&gt;
+    <span class="keyword">if</span> opacity &lt;= <span class="number">100</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>console.log &quot;fade in slide #{opacity}&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      setOpacity(obj, opacity)
+      opacity += <span class="number">2</span>
+      fadeInTimeout = setTimeout(-&gt;
+        fadeInContainer obj, opacity, <span class="number">200</span>)
+    <span class="keyword">else</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>console.log &quot;+++ fadeInContainer complete +++&quot;
+clear the timeout that did this fading</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      clearTimeout(fadeInTimeout);</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <p>clear the timeout that called this method</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      clearTimeout fadeInContainerTimeout</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p>anonymous setTimeout with multiple methods or property settings,
+you need the new line that has comma with delay amount or an error is thrown</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      slideshowTimeout = setTimeout(-&gt;
+        console.log  <span class="string">"*** slideshow playing, first time start ***"</span>
+        runSlideshow()
+        toggle.innerHTML = <span class="string">"Slideshow is playing, &amp;#9785; Pause it."</span>
+        slideshowPaused = <span class="literal">false</span>
+      , <span class="number">4000</span>)
+
+
+  <span class="function"><span class="title">runSlideshow</span></span> = -&gt;
+    console.log <span class="string">"+++ runSlideshow called +++"</span>
+    console.log <span class="string">"curImage is <span class="subst">#{curImage}</span>"</span>
+    console.log <span class="string">"next image is: <span class="subst">#{photos[(curImage + <span class="number">1</span>) % slides.length].alt}</span>"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p>SETTINGS ON NEXT IMAGE IN STACK
+make the next image in the stack visible (look in the top from some modulus info, which you always forget)
+and that it&#39;s opaque when you fade out the current image, which will reveal the one under</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    slides[(curImage + <span class="number">1</span>) % slides.length].style.visibility = <span class="string">'visible'</span>
+    setOpacity(slides[(curImage + <span class="number">1</span>) % slides.length], <span class="number">100</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p>clear the timeout that called this method</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    console.log <span class="string">"slideshowTimeout ID: <span class="subst">#{slideshowTimeout}</span>"</span>
+    clearTimeout slideshowTimeout
+    console.log <span class="string">"slideshowTimeout ID: <span class="subst">#{slideshowTimeout}</span>"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>FADE OUT current image</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    fadeOutSlide(slides[curImage % slides.length], <span class="number">100</span>)
+
+  <span class="function"><span class="title">fadeOutSlide</span></span> = (obj, opacity) -&gt;
+    <span class="keyword">if</span> opacity &gt;= <span class="number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>console.log &quot;fade out slide #{opacity}&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      setOpacity(obj, opacity)
+      opacity -= <span class="number">2</span>
+      fadeOutTimeout = setTimeout( -&gt;
+        fadeOutSlide obj, opacity, <span class="number">200</span>)
+    <span class="keyword">else</span>
+      console.log <span class="string">"+++ fadeOutSlide complete +++"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p>clear the timeout used to fade the current image, just finished</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      clearTimeout fadeOutTimeout</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>HIDE the current image that just had the next one faded over it</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      slides[curImage % slides.length].style.visibility = <span class="string">'hidden'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>SHUFFLE INDEX</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      reorderLayerStack()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-29">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-29">&#182;</a>
+              </div>
+              <p>increase the curImage</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      curImage++</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-30">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-30">&#182;</a>
+              </div>
+              <p>check to see if the curImage is 0, in that case we&#39;ll reset
+if curImage % (slides.length) is 0
+  curImage = 0
+  console.log &quot;<strong><em> reset curImage </em></strong>&quot;
+shorter still, but no logging</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      curImage = <span class="number">0</span> <span class="keyword">if</span> curImage % slides.length <span class="keyword">is</span> <span class="number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-31">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-31">&#182;</a>
+              </div>
+              <p>check to see if the slideshow is paused, if not runSlideshow again</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      slideshowTimeout = setTimeout(runSlideshow, <span class="number">3500</span>) <span class="keyword">unless</span> slideshowPaused
+
+  <span class="function"><span class="title">fadeOutSlideAdvance</span></span> = (obj, opacity) -&gt;
+    <span class="keyword">if</span> opacity &gt;= <span class="number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-32">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-32">&#182;</a>
+              </div>
+              <p>console.log &quot;fade out slide #{opacity}&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      setOpacity(obj, opacity)
+      opacity -= <span class="number">10</span>
+      fadeOutTimeout = setTimeout( -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-33">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-33">&#182;</a>
+              </div>
+              <p>note: you&#39;re looking at passing arguments in () no commas used outside of there but you need a new line
+fadeOutSlideAdvance(obj, opacity)
+200)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        fadeOutSlideAdvance obj, opacity, <span class="number">10</span>)
+    <span class="keyword">else</span>
+      console.log <span class="string">"+++ fadeOutSlideAdvance complete for advancing slide +++"</span>
+      obj.style.visibility = <span class="string">'hidden'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p>call the runSlideshow so the show keeps running</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      slideshowTimeout = setTimeout(runSlideshow, <span class="number">3500</span>) <span class="keyword">unless</span> slideshowPaused</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-35">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-35">&#182;</a>
+              </div>
+              <p>Reorder the layer stack</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      <span class="function"><span class="title">shuffle</span></span> = -&gt;
+        slides[_i].style.zIndex = ((slides.length - _i) + (curImage - <span class="number">1</span>)) % slides.length
+      shuffle slide <span class="keyword">for</span> slide <span class="keyword">in</span> slides
+      <span class="keyword">return</span> <span class="literal">true</span>
+
+
+  <span class="function"><span class="title">setVisibilityForAdvance</span></span> = (direction) -&gt;
+    console.log <span class="string">"+++ setVisibilityForAdvance called: slide advance direction <span class="subst">#{direction.name}</span> +++"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-36">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-36">&#182;</a>
+              </div>
+              <p>check the direction to determine which &#39;next or prev&#39; image should be visible
+so that it is visible when the current image fades out.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">switch</span> direction
+      <span class="keyword">when</span> next
+        slides[(curImage + <span class="number">1</span>) % slides.length].style.visibility = <span class="string">'visible'</span>
+      <span class="keyword">when</span> prev</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-37">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-37">&#182;</a>
+              </div>
+              <p>console.log (curImage - 1) % slides.length</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        slides[(curImage - <span class="number">1</span>) % slides.length].style.visibility = <span class="string">'visible'</span>
+      <span class="keyword">else</span>
+        <span class="keyword">break</span>
+
+
+  <span class="function"><span class="title">showSlideOnThumbClick</span></span> = (thumbId) -&gt;
+    console.log <span class="string">"+++ thumb <span class="subst">#{thumbId}</span> clicked +++"</span>
+    console.log <span class="string">"curImage is <span class="subst">#{curImage}</span>"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-38">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-38">&#182;</a>
+              </div>
+              <p>make sure the slide you are about to reveal is visible</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    slides[thumbId].style.visibility = <span class="string">'visible'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>make sure the slide you are about to reveal is opaque</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    setOpacity(slides[thumbId], <span class="number">100</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-40">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-40">&#182;</a>
+              </div>
+              <p>now you can fade out the current image</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    fadeOutSlideAdvance(slides[curImage % slides.length], <span class="number">100</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-41">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-41">&#182;</a>
+              </div>
+              <p>assign the curImage to the slide you just clicked, but first convert it to a number
+tip: you can also convert by taking a string and multiplying by 1 as in &quot;2&quot; * 1</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    curImage = parseInt(thumbId, <span class="number">10</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-42">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-42">&#182;</a>
+              </div>
+              <p>if you want to keep the slideshow playing after clicking to advance clearTimeout for calling it
+because you call runSlideshow again with a new timeout in the complete on fadeOutSlideAdvance
+clearTimeout slideshowTimeout</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="title">reorderLayerStack</span></span> = -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-43">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-43">&#182;</a>
+              </div>
+              <p>console.log &quot;+++ shuffle z-index +++&quot;
+console.log &quot;+++ shuffle z-index: #{slides.length} +++&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="function"><span class="title">shuffle</span></span> = -&gt;
+      slides[_i].style.zIndex = (((slides.length) - _i) + curImage) % slides.length
+    shuffle slide <span class="keyword">for</span> slide <span class="keyword">in</span> slides
+    <span class="keyword">return</span> <span class="literal">true</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-44">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h2">
+                <a class="pilcrow" href="#section-44">&#182;</a>
+              </div>
+              <h2>public</h2>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-45">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-45">&#182;</a>
+              </div>
+              
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  initSlides: (slideWrapper) -&gt;
+    console.log <span class="string">"+++ initSlides called +++"</span>
+    curImage = <span class="number">0</span>
+    loadedSlideCount = <span class="number">0</span>
+    slideshow = document.getElementById(slideWrapper)
+    slides = slideshow.getElementsByTagName(<span class="string">"div"</span>)
+    photos = slideshow.getElementsByTagName(<span class="string">"img"</span>)
+    thumbset = document.getElementById(<span class="string">"thumb-wrapper"</span>)
+    thumbs = thumbset.getElementsByTagName(<span class="string">"img"</span>)
+    totalImageCount = photos.length</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-46">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-46">&#182;</a>
+              </div>
+              <p>SET THE PLAYBACK NEXT PREV UI
+you use the name property to determine which direction the slide clicks are going
+you have a switch set against that direction</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    next = document.getElementById(<span class="string">"next"</span>)
+    next.innerHTML = <span class="string">"next &amp;#10095;"</span>
+    next.name = <span class="string">"NEXT"</span>
+    next.<span class="function"><span class="title">onclick</span></span> = -&gt;
+      STUDIO.slideshow.nextSlide()
+    prev = document.getElementById(<span class="string">"previous"</span>)
+    prev.innerHTML = <span class="string">"&amp;#10094; prev"</span>
+    prev.name = <span class="string">"PREV"</span>
+    prev.<span class="function"><span class="title">onclick</span></span> = -&gt;
+      STUDIO.slideshow.prevSlide()
+    toggle = document.getElementById(<span class="string">"toggle"</span>)
+    toggle.<span class="function"><span class="title">onclick</span></span> = -&gt;
+      STUDIO.slideshow.pauseSlideshow()</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-47">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-47">&#182;</a>
+              </div>
+              <p>FADE DOWN THE SLIDESHOW WRAPPER (50% for now)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    setOpacity(slideshow, <span class="number">50</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-48">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-48">&#182;</a>
+              </div>
+              <p>SETTINGS FOR EACH SLIDE: z-index, opacity, offset position, visibility (for IE8)
+after you do the initial settings, turn up the first slide</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">for</span> slide <span class="keyword">in</span> slides
+      slide.style.zIndex = ((slides.length-<span class="number">1</span>)-_i)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-49">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-49">&#182;</a>
+              </div>
+              <p>FADE DOWN EACH SLIDE (20% for now)</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      setOpacity(slide, <span class="number">20</span>)
+      slide.style.visibility = <span class="string">'hidden'</span>;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-50">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-50">&#182;</a>
+              </div>
+              <p>Setting the thumbnail data for changing the main slide later
+console.log &quot;img src is  #{thumbs[_i].getAttribute(&#39;src&#39;)}&quot;
+console.log &quot;---&gt; #{thumbs[_i]}&quot;
+console.log thumbs[_i].parentNode</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      link = thumbs[_i].parentNode</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-51">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-51">&#182;</a>
+              </div>
+              <p>console.log &quot;link is:  #{link}&quot;</p>
+<p>looking at several ways to store that id, but
+won&#39;t work for clicks, b/c it&#39;s always going to be the last item
+better to get it during the actual onclick
+thumbId = thumbs[_i].parentNode.dataset.slideshowId
+thumbId = link.dataset.slideshowId
+link.id = thumbId
+console.log thumbId
+link.id = link.dataset.slideshowId
+console.log link.id</p>
+<p>attach a handler to the link elememt</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      link.<span class="function"><span class="title">onclick</span></span> = -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-52">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-52">&#182;</a>
+              </div>
+              <p>thumbs[_i].parentNode.onclick = -&gt;
+console.log &quot;#{this}&quot;
+console.log this.dataset.slideshowId</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        <span class="keyword">this</span>.slideId = parseInt(<span class="keyword">this</span>.dataset.slideshowId, <span class="number">10</span>)
+        console.log <span class="keyword">this</span>.slideId
+
+        showSlideOnThumbClick(<span class="keyword">this</span>.slideId) <span class="keyword">unless</span> curImage <span class="keyword">is</span> <span class="keyword">this</span>.slideId
+        <span class="keyword">return</span> <span class="literal">false</span> <span class="comment"># prevent default behavior of clicking link</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>SHOW and FADE UP the first slide, after you&#39;ve hidden them all</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    setOpacity(slides[<span class="number">0</span>], <span class="number">100</span>)
+    slides[<span class="number">0</span>].style.visibility = <span class="string">'visible'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>CHECK THE LOAD STATUS
+console.log &quot;totalImageCount is #{totalImageCount}&quot;
+console.log &quot;loadedSlideCount is #{loadedSlideCount}&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">if</span> totalImageCount <span class="keyword">is</span> loadedSlideCount
+      console.log <span class="string">"+ ================== +"</span>
+      console.log <span class="string">"+ IMAGES WERE CACHED +"</span>
+      console.log <span class="string">"+ ================== +"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>Fade up or show the first slide code goes here</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      fadeInTimeout = setTimeout(-&gt;
+        fadeInContainer obj, opacity, <span class="number">20</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-56">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-56">&#182;</a>
+              </div>
+              <p>otherwise check for the total images loaded to match the total image count</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">else</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>console.log &quot;load slide images&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      i = <span class="number">0</span>
+      <span class="keyword">while</span> i &lt; totalImageCount
+        photos[i].onLoad = onImageLoad(i)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>console.log slides[i].offsetWidth</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>        i += <span class="number">1</span>
+
+    <span class="keyword">return</span> <span class="literal">true</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-59">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-59">&#182;</a>
+              </div>
+              <p>end initSlides</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  pauseSlideshow: -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-60">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-60">&#182;</a>
+              </div>
+              <p>console.log &quot;+++ currently slideshowPaused is #{slideshowPaused} +++&quot;</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    <span class="keyword">unless</span> slideshowPaused
+      console.log <span class="string">"slideshow paused"</span>
+      clearTimeout slideshowTimeout
+      slideshowPaused = <span class="literal">true</span>
+      toggle.innerHTML = <span class="string">"Slideshow is paused, &amp;#9787; Play it."</span>
+    <span class="keyword">else</span>
+      console.log <span class="string">"slideshow playing"</span>
+      runSlideshow()
+      slideshowPaused = <span class="literal">false</span>
+      toggle.innerHTML = <span class="string">"Slideshow is playing, &amp;#9785; Pause it."</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-61">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-61">&#182;</a>
+              </div>
+              <p>It would be sweet if you could DRY up the next and prev methods... they are very similar.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  nextSlide: -&gt;
+    console.log <span class="string">"+++ next slide button clicked +++"</span>
+    console.log <span class="string">"curImage is <span class="subst">#{curImage}</span>"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-62">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-62">&#182;</a>
+              </div>
+              <p>if you want to keep the slideshow playing after clicking to advance. little hazy on this still, yes.
+oh... i think this might clear any slideshowTimeouts about to run and don&#39;t worry b/c you call it...
+because you call runSlideshow again with a new slideshowTimeout in the complete on fadeOutSlideAdvance</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    clearTimeout slideshowTimeout</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-63">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-63">&#182;</a>
+              </div>
+              <p>make sure the next slide is visible before the current one fades out</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    setVisibilityForAdvance(next)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>clear any current image fade out timeouts, needed if you&#39;re quickly advancing
+I don&#39;t think you need to worry about completing the fade b/c we set opacity and visibilty.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    clearTimeout fadeOutTimeout</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-65">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-65">&#182;</a>
+              </div>
+              <p>set the opacity on the slide about to be revealed during the current image fade out</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    setOpacity(slides[(curImage + <span class="number">1</span>) % slides.length], <span class="number">100</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-66">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-66">&#182;</a>
+              </div>
+              <p>fade out for advancing slide</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    fadeOutSlideAdvance(slides[curImage % slides.length], <span class="number">100</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <p>current image iteration</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    curImage++</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>current image reset if needed</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    curImage = <span class="number">0</span> <span class="keyword">if</span> curImage % slides.length <span class="keyword">is</span> <span class="number">0</span>
+
+  prevSlide: -&gt;
+    console.log <span class="string">"+++ prev slide button clicked +++"</span>
+    console.log <span class="string">"curImage is <span class="subst">#{curImage}</span>"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-69">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-69">&#182;</a>
+              </div>
+              <p>if you want to keep the slideshow playing after clicking to advance. little hazy on this still, yes.
+oh... i think this might clear any slideshowTimeouts about to run and don&#39;t worry b/c you call it...
+because you call runSlideshow again with a new slideshowTimeout in the complete on fadeOutSlideAdvance</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    clearTimeout slideshowTimeout</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <p>clear any current image fade out timeouts, needed if you&#39;re quickly advancing
+I don&#39;t think you need to worry about completing the fade b/c we set opacity and visibilty.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    clearTimeout fadeOutTimeout</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p>if you&#39;re at the start (0) set the curImg to the slide total,
+so it can loop backwards (can&#39;t go -1 on curImage, so (curImage - 1) % slides.length gives -1 )</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    curImage = slides.length <span class="keyword">if</span> curImage % slides.length <span class="keyword">is</span> <span class="number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-72">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-72">&#182;</a>
+              </div>
+              <p>make sure the prev slide is visible before the current one fades out</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    setVisibilityForAdvance(prev)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              <p>set the opacity on the slide about to be revealed during the current image fade out</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    setOpacity(slides[(curImage - <span class="number">1</span>) % slides.length], <span class="number">100</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-74">&#182;</a>
+              </div>
+              <p>fade out for advancing slide</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    fadeOutSlideAdvance(slides[curImage % slides.length], <span class="number">100</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-75">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-75">&#182;</a>
+              </div>
+              <p>current image iteration</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    curImage--</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-76">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-76">&#182;</a>
+              </div>
+              <p>DEBUGGING in browser console...
+methods you can call in the browser&#39;s console</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  getCurImage: -&gt;
+    <span class="keyword">return</span> curImage</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-77">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-77">&#182;</a>
+              </div>
+              <p>CUSTOM attributes in your markup yay html5!
+<a href="http://html5doctor.com/html5-custom-data-attributes/">http://html5doctor.com/html5-custom-data-attributes/</a>
+Below are 2 examples from the doctor page, one is more &#39;modern&#39;
+DATASET element attributes that can be totally customized in markup that you can to pass into JS
+This was studied for using an &quot;id&quot; within the thumb markup instead of a class or id attribute</p>
+<p>MODERN BROWSERS can use dataset, check caniuse.com</p>
+<p><div id='sunflower' data-leaves='47' data-plant-height='2.4m'></div>
+// &#39;Getting&#39; data-attributes using dataset
+var plant = document.getElementById(&#39;sunflower&#39;);
+var leaves = plant.dataset.leaves; // leaves = 47;
+// &#39;Setting&#39; data-attributes using dataset
+var tallness = plant.dataset.plantHeight; // &#39;plant-height&#39; -&gt; &#39;plantHeight&#39;
+plant.dataset.plantHeight = &#39;3.6m&#39;;  // Cracking fertiliser</p>
+<p>the older way is to use getAttribute and setAttribute,
+but caniuse says 65% support at the time of this development</p>
+<p><div id='strawberry-plant' data-fruit='12'></div>
+// &#39;Getting&#39; data-attributes using getAttribute
+var plant = document.getElementById(&#39;strawberry-plant&#39;);
+var fruitCount = plant.getAttribute(&#39;data-fruit&#39;); // fruitCount = &#39;12&#39;
+// &#39;Setting&#39; data-attributes using setAttribute
+plant.setAttribute(&#39;data-fruit&#39;,&#39;7&#39;); // Pesky birds
+</script></p>
+<p><a href="images/beercan-image-a.jpg" data-slideshow-id="0"></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  getSlideId: (id) -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-78">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-78">&#182;</a>
+              </div>
+              <p>&#39;Getting&#39; data-attributes using dataset</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    thumbId = thumbs[id].parentNode.dataset.slideshowId
+    <span class="keyword">return</span> thumbId</pre></div></div>
+            
+        </li>
+        
+    </ul>
+  </div>
+</body>
+</html>

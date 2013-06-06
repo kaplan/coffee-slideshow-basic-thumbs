@@ -1,9 +1,6 @@
 ###
-
-Slideshow Application
-========================================================================================================
-
-Description: Basic slideshow with thumbnail images fading with controls sans library (why? idk)
+Slideshow Application with Thumbs
+Description: Basic slideshow with thumbnail images fading with controls sans library (why? idk). Just learning so this is me winging it.
 
 Neat stuff: There is also a Rake file you can run in the Terminal to start the watch on the scss and coffeescript. I'm not sure what the last parts are, I should find out more. The Rake comes from a great post, by Nick Quaranto: http://quaran.to/blog/2013/01/09/use-jekyll-scss-coffeescript-without-plugins/
 
@@ -19,54 +16,15 @@ The thumbs have a custom attribute, data-, that is pretty neat for semantic mark
 
 Working on make the JavaScript unobtrusive: I started to pull out the eventhandlers from the markup, removed the onclick="STUDIO.slideshow.pauseSlideshow()" from the toggle, next and prev. Those are now in here, where they should be for the separation between structure and behavior.
 
-Next: I'd like to add some better or more clear documentation for the methods and properties and begin really eleminating and comments or console.logs. At this point it's very handy for me to watch the Browser's console log to see what the application is doing. In the end the comments don't compile into the JavaScript from CoffeeScript and I think that's one of my favorite things about CS. My JavaScript files were a mess with commented out logs and notes that I would leave out of fear of forgetting what I was doing, but it made for a very littered looking code, not at all crafsman like. Maybe it's the quality of my comments and the fact I try different snippets within before I settle on an approach... anyway enough rambling.
-========================================================================================================
+Next: I'd like to add some better or more clear documentation for the methods and properties and begin really eleminating and comments or console.logs. At this point it's very handy for me to watch the Browser's console log to see what the application is doing. In the end the comments don't compile into the JavaScript from CoffeeScript and I think that's one of my favorite things about CS. My JavaScript files were a mess with commented out logs and notes that I would leave out of fear of forgetting what I was doing, but it made for a very littered looking code, not at all crafsman like. Maybe it's the quality of my comments and the fact I try different snippets within before I settle on an approach.
 
+Found this on Docco, which I need to start using:
+http://jashkenas.github.io/docco/
+http://lostechies.com/derickbailey/2011/12/14/annotated-source-code-as-documentation-with-docco/
 ###
 
-# ===============================================
-# Coffeescript Module Pattern for reference
 
-# SAMPLE COFFEE MODULE PATTERN
-# Namespace the application using this with an empty object if is not null
-# @STUDIO = @STUDIO ? {}
-
-# STUDIO Module for Slideshow
-# @STUDIO.sampleModulePattern = do ->
-
-#   # Private
-
-#   # private properties
-#   myPrivateVar = "myPrivateVar accessed from within the Studio.sampleModulePattern"
-
-#   # private methods
-#   myPrivateMethod = ->
-#     console.log("myPrivateMethod accessed from within the Studio.sampleModulePattern")
-
-#   # Public
-
-#   # using the : with the property adds a return
-#   # the return opens the properties and methods public access
-#   # from within the public interface you can access the private methods and properties
-
-#   # public properties
-#   myPublicProperty: "myPublicProperty is being accessed in here!"
-
-#   # public methods
-#   myPublicMethod: ->
-#     console.log("<--- myPublicMethod called ---> ");
-#     # Within sampleModulePattern, you can access private
-#     console.log(myPrivateVar)
-#     myPrivateMethod()
-
-
-# MODULUS info, because you're not so good at math or remembering remainder action
-# 30 % 10 = 0 -> the remainder is .0 ( 30/10 = 3.0 )
-# 43 % 10 = 3 -> the remainder is .3 ( 43/10 = 4.3 )
-# 1 % 4 = 1 -> the remainder is rounded to 1 from ( 1/4 = 0.25 ) ??
-
-
-# Window attached instead of a namespaced module
+# Using addLoadEvent instead of jQuery ready, but not sure if this is the best approach.
 addLoadEvent = (func) ->
   oldonload = window.onload
   if typeof window.onload isnt 'function'
@@ -77,14 +35,11 @@ addLoadEvent = (func) ->
       func()
 
 
-# ===============================================
-
 # Namespace the application using this with an empty object if is not null
 @STUDIO = @STUDIO ? {}
 
 @STUDIO.slideshow = do ->
 
-  # =======
   # private
 
   slideshow = slides = photos = thumbset = thumbs = toggle = next = prev = "unknown"
@@ -300,8 +255,8 @@ addLoadEvent = (func) ->
     shuffle slide for slide in slides
     return true
 
-  # ======
   # public
+  # ------
 
   initSlides: (slideWrapper) ->
     console.log "+++ initSlides called +++"
@@ -485,7 +440,6 @@ addLoadEvent = (func) ->
   # This was studied for using an "id" within the thumb markup instead of a class or id attribute
 
   # MODERN BROWSERS can use dataset, check caniuse.com
-  # ============================================================
   # <div id='sunflower' data-leaves='47' data-plant-height='2.4m'></div>
   # // 'Getting' data-attributes using dataset
   # var plant = document.getElementById('sunflower');
@@ -497,7 +451,6 @@ addLoadEvent = (func) ->
 
   # the older way is to use getAttribute and setAttribute,
   # but caniuse says 65% support at the time of this development
-  # ============================================================
   # <div id='strawberry-plant' data-fruit='12'></div>
   # // 'Getting' data-attributes using getAttribute
   # var plant = document.getElementById('strawberry-plant');
