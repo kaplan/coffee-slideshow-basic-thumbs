@@ -4,7 +4,7 @@
 Slideshow Application
 ========================================================================================================
 
-Description:  Basic slideshow with thumbnail images, no frameworks, fading with controls.
+Description:  Basic slideshow with thumbnail images fading with controls sans library (why? idk)
 
 Dependencies: Modernizr, for js detection
 
@@ -36,9 +36,158 @@ addLoadEvent = function(func) {
 this.STUDIO = (_ref = this.STUDIO) != null ? _ref : {};
 
 this.STUDIO.slideshow = (function() {
+  var curImage, fadeInContainer, fadeInContainerTimeout, fadeInObject, fadeOutSlide, fadeOutSlideAdvance, fadeOutTimeout, loadedSlideCount, next, onImageLoad, photos, playback, prev, reorderLayerStack, runSlideshow, setOpacity, setVisibilityForAdvance, slideCount, slides, slideshow, slideshowPaused, slideshowTimeout, thumbs, totalImageCount;
+
+  slideshow = slides = photos = thumbs = playback = next = prev = "unknown";
+  curImage = slideCount = totalImageCount = loadedSlideCount = 0;
+  fadeInContainerTimeout = slideshowTimeout = fadeOutTimeout = null;
+  slideshowPaused = false;
+  onImageLoad = function(slideOrder) {
+    var fadeInThumbs;
+
+    slides[slideOrder].style.display = "block";
+    loadedSlideCount++;
+    console.log("loading an image " + slideOrder);
+    console.log("loadedSlideCount is " + loadedSlideCount);
+    if (totalImageCount === loadedSlideCount) {
+      console.log("+ ================== +");
+      console.log("+ ALL IMAGES LOADED! +");
+      console.log("+ ================== +");
+      fadeInContainerTimeout = setTimeout(function() {
+        console.log("!! ALL IMAGES LOADED: FADE IN THE SLIDESHOW CONTAINER !!");
+        return fadeInContainer(slideshow, 0, 500);
+      });
+      return fadeInThumbs = setTimeout(function() {
+        return fadeInObject(thumbs, 0, 500);
+      });
+    }
+  };
+  setOpacity = function(obj, opacity) {
+    obj.style.filter = "alpha(opacity:" + opacity + ")";
+    obj.style.KHTMLOpacity = opacity / 100;
+    obj.style.MozOpacity = opacity / 100;
+    obj.style.opacity = opacity / 100;
+    return obj.style.opacity = opacity / 100;
+  };
+  fadeInObject = function(obj, opacity) {
+    var fadeInObjectTimeout;
+
+    if (opacity <= 100) {
+      setOpacity(obj, opacity);
+      opacity += 2;
+      return fadeInObjectTimeout = setTimeout(function() {
+        return fadeInObject(obj, opacity, 200);
+      });
+    } else {
+      clearTimeout(fadeInObjectTimeout);
+      return console.log('*** done with fadeInObject ***');
+    }
+  };
+  fadeInContainer = function(obj, opacity) {
+    var fadeInTimeout;
+
+    if (opacity <= 100) {
+      setOpacity(obj, opacity);
+      opacity += 2;
+      return fadeInTimeout = setTimeout(function() {
+        return fadeInContainer(obj, opacity, 200);
+      });
+    } else {
+      console.log("+++ fadeInContainer complete +++");
+      clearTimeout(fadeInTimeout);
+      clearTimeout(fadeInContainerTimeout);
+      return slideshowTimeout = setTimeout(function() {
+        console.log("*** slideshow playing, first time start ***");
+        runSlideshow();
+        return slideshowPaused = false;
+      }, 4000);
+    }
+  };
+  runSlideshow = function() {
+    console.log("+++ runSlideshow called +++");
+    console.log("curImage is " + curImage);
+    console.log("next image is: " + photos[(curImage + 1) % slides.length].alt);
+    slides[(curImage + 1) % slides.length].style.visibility = 'visible';
+    setOpacity(slides[(curImage + 1) % slides.length], 100);
+    console.log("slideshowTimeout ID: " + slideshowTimeout);
+    clearTimeout(slideshowTimeout);
+    console.log("slideshowTimeout ID: " + slideshowTimeout);
+    return fadeOutSlide(slides[curImage % slides.length], 100);
+  };
+  fadeOutSlide = function(obj, opacity) {
+    if (opacity >= 0) {
+      setOpacity(obj, opacity);
+      opacity -= 2;
+      return fadeOutTimeout = setTimeout(function() {
+        return fadeOutSlide(obj, opacity, 200);
+      });
+    } else {
+      console.log("+++ fadeOutSlide complete +++");
+      clearTimeout(fadeOutTimeout);
+      slides[curImage % slides.length].style.visibility = 'hidden';
+      reorderLayerStack();
+      curImage++;
+      if (curImage % slides.length === 0) {
+        curImage = 0;
+      }
+      if (!slideshowPaused) {
+        return slideshowTimeout = setTimeout(runSlideshow, 3500);
+      }
+    }
+  };
+  fadeOutSlideAdvance = function(obj, opacity, direction) {
+    var shuffle, slide, _i, _len;
+
+    if (opacity >= 0) {
+      console.log("fade out slide " + opacity);
+      setOpacity(obj, opacity);
+      opacity -= 2;
+      return fadeOutTimeout = setTimeout(function() {
+        return fadeOutSlideAdvance(obj, opacity, 10);
+      });
+    } else {
+      console.log("+++ fadeOutSlideAdvance complete for advancing slide +++");
+      obj.style.visibility = 'hidden';
+      if (!slideshowPaused) {
+        slideshowTimeout = setTimeout(runSlideshow, 3500);
+      }
+      shuffle = function() {
+        return slides[_i].style.zIndex = ((slides.length - _i) + (curImage - 1)) % slides.length;
+      };
+      for (_i = 0, _len = slides.length; _i < _len; _i++) {
+        slide = slides[_i];
+        shuffle(slide);
+      }
+      return true;
+    }
+  };
+  setVisibilityForAdvance = function(direction) {
+    console.log("+++ setVisibilityForAdvance called: slide advance direction " + direction.name + " +++");
+    switch (direction) {
+      case next:
+        return slides[(curImage + 1) % slides.length].style.visibility = 'visible';
+      case prev:
+        console.log((curImage - 1) % slides.length);
+        return slides[(curImage - 1) % slides.length].style.visibility = 'visible';
+      default:
+        break;
+    }
+  };
+  reorderLayerStack = function() {
+    var shuffle, slide, _i, _len;
+
+    shuffle = function() {
+      return slides[_i].style.zIndex = ((slides.length - _i) + curImage) % slides.length;
+    };
+    for (_i = 0, _len = slides.length; _i < _len; _i++) {
+      slide = slides[_i];
+      shuffle(slide);
+    }
+    return true;
+  };
   return {
     initSlides: function(slideWrapper) {
-      var curImage, loadedSlideCount, photos, slides, slideshow, totalImageCount;
+      var fadeInTimeout, i, slide, _i, _len;
 
       console.log("+++ initSlides called +++");
       curImage = 0;
@@ -46,7 +195,80 @@ this.STUDIO.slideshow = (function() {
       slideshow = document.getElementById(slideWrapper);
       slides = slideshow.getElementsByTagName("div");
       photos = slideshow.getElementsByTagName("img");
-      return totalImageCount = photos.length;
+      thumbs = document.getElementById("thumb-wrapper");
+      totalImageCount = photos.length;
+      next = document.getElementById("next");
+      next.innerHTML = "next &#10095;";
+      next.name = "NEXT";
+      prev = document.getElementById("previous");
+      prev.innerHTML = "&#10094; prev";
+      prev.name = "PREV";
+      playback = document.getElementById("toggle");
+      setOpacity(slideshow, 50);
+      for (_i = 0, _len = slides.length; _i < _len; _i++) {
+        slide = slides[_i];
+        slide.style.zIndex = (slides.length - 1) - _i;
+        setOpacity(slide, 20);
+        slide.style.visibility = 'hidden';
+      }
+      setOpacity(slides[0], 100);
+      slides[0].style.visibility = 'visible';
+      console.log("totalImageCount is " + totalImageCount);
+      console.log("loadedSlideCount is " + loadedSlideCount);
+      if (totalImageCount === loadedSlideCount) {
+        console.log("+ ================== +");
+        console.log("+ IMAGES WERE CACHED +");
+        console.log("+ ================== +");
+        fadeInTimeout = setTimeout(function() {
+          return fadeInContainer(obj, opacity, 20);
+        });
+      } else {
+        console.log("load a slide image");
+        i = 0;
+        while (i < totalImageCount) {
+          photos[i].onLoad = onImageLoad(i);
+          i += 1;
+        }
+      }
+      return true;
+    },
+    pauseSlideshow: function() {
+      if (!slideshowPaused) {
+        console.log("slideshow paused");
+        clearTimeout(slideshowTimeout);
+        slideshowPaused = true;
+        return playback.innerHTML = "Slideshow is paused, &#9787; Play it.";
+      } else {
+        console.log("slideshow playing");
+        runSlideshow();
+        slideshowPaused = false;
+        return playback.innerHTML = "Slideshow is playing, &#9785; Pause it.";
+      }
+    },
+    nextSlide: function() {
+      console.log("+++ next slide button clicked +++");
+      clearTimeout(slideshowTimeout);
+      setVisibilityForAdvance(next);
+      clearTimeout(fadeOutTimeout);
+      setOpacity(slides[(curImage + 1) % slides.length], 100);
+      fadeOutSlideAdvance(slides[curImage % slides.length], 100, next);
+      curImage++;
+      if (curImage % slides.length === 0) {
+        return curImage = 0;
+      }
+    },
+    prevSlide: function() {
+      console.log("+++ prev slide button clicked +++");
+      console.log("curImage is " + curImage);
+      clearTimeout(slideshowTimeout);
+      clearTimeout(fadeOutTimeout);
+      if (curImage % slides.length === 0) {
+        curImage = slides.length;
+      }
+      setVisibilityForAdvance(prev);
+      setOpacity(slides[(curImage - 1) % slides.length], 100);
+      fadeOutSlideAdvance(slides[curImage % slides.length], 100, prev);
+      return curImage--;
     }
   };
 })();

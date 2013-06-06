@@ -1,5 +1,19 @@
 @import "base";
 
+/* NOTE: this mixin will overwrite the Compass clearfix */
+@mixin clearfix {
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
+div {
+  margin: 0;
+  padding: 0;
+}
+
 // ================================= NO-JS ================================= //
 /* The ampersand (&) selector is a Sass convention that means “this element.”
    When this code is compiled Sass will replace all the & symbols
@@ -30,37 +44,14 @@ html {
 
 body {
   font-family: "Helvetica Neue";
+  padding: 10px;
 }
 
-#slideshow-wrapper {
-  height: 380px;
-  overflow: hidden;
-  position: relative;
-  width: 380px;
 
-  div, img {
-    height: 380px;
-    position: absolute;
-    width: 380px;
-  }
-
-  div {
-    display: none;
-  }
-
-  p {
-    background-color: #fff;
-    position: absolute;
-    top: 0;
-    left: 0;
-    // LOOK INTO whether or not you need the z-index on captions.
-    // z-index: 10;
-  }
-
-}
 
 
 .wrapper {
+  margin: 0 auto;
   position: relative;
   width: 380px;
   -webkit-touch-callout: none;
@@ -70,19 +61,53 @@ body {
   -ms-user-select: none;
   user-select: none;
 
+
+
+  #slideshow-wrapper {
+    height: 380px;
+    overflow: hidden;
+    // outline: 1px dotted #333;
+    position: relative;
+    width: 380px;
+
+    div, img {
+      height: 380px;
+      position: absolute;
+      width: 380px;
+    }
+
+    div {
+      display: none;
+    }
+
+    p {
+      background-color: #fff;
+      position: absolute;
+      top: 0;
+      left: 0;
+      // LOOK INTO whether or not you need the z-index on captions.
+      // z-index: 10;
+    }
+  }
+
+
   #toggle {
-    @include border-radius(4px);
-    border: 1px solid #999;
+    // @include border-radius(6px);
+    background-color: #efefef;
+    // border: 1px solid #dedede;
     cursor: pointer;
     display: block;
-    padding: 5px;
+    // height: 44px;
+    padding: 10px;
+    margin-top: 5px;
     text-align: center;
   }
 
   #next {
-    @include border-radius(4px);
-    bottom: 80px;
-    border: 1px solid #999;
+    // @include border-radius(4px);
+    background-color: #fff;
+    bottom: 195px;
+    // border: 1px solid #999;
     cursor: pointer;
     padding: 5px;
     position: absolute;
@@ -91,13 +116,38 @@ body {
   }
 
   #previous {
-    @include border-radius(4px);
-    bottom: 80px;
-    border: 1px solid #999;
+    // @include border-radius(4px);
+    background-color: #fff;
+    bottom: 195px;
+    // border: 1px solid #999;
     cursor: pointer;
+    left: 0;
     padding: 5px;
     position: absolute;
-    left: 0;
     z-index: 9;
+  }
+
+  #thumb-wrapper {
+    @include clearfix;
+    // @include pie-clearfix;
+    // background-color: #FF6000;
+    height: 95px;
+    // display: none;
+    margin-top: 5px;
+    opacity: 0;
+
+    div {
+      margin: 0;
+      padding: 0;
+      float: left;
+    }
+
+    img {
+      margin: 0;
+      padding: 0;
+      padding: 1px;
+      height: 95px;
+      width: 95px;
+    }
   }
 }
