@@ -458,13 +458,13 @@ html.no-js #toggle, html.no-js #next, html.no-js #previous {
   display: none;
 }
 
-/* line 45, ../src/style.css.scss */
+/* line 44, ../src/style.css.scss */
 body {
   font-family: "Helvetica Neue";
   padding: 10px;
 }
 
-/* line 53, ../src/style.css.scss */
+/* line 49, ../src/style.css.scss */
 .wrapper {
   margin: 0 auto;
   position: relative;
@@ -476,31 +476,32 @@ body {
   -ms-user-select: none;
   user-select: none;
 }
-/* line 66, ../src/style.css.scss */
+/* line 61, ../src/style.css.scss */
 .wrapper #slideshow-wrapper {
   height: 380px;
   overflow: hidden;
   position: relative;
   width: 380px;
 }
-/* line 73, ../src/style.css.scss */
+/* line 68, ../src/style.css.scss */
 .wrapper #slideshow-wrapper div, .wrapper #slideshow-wrapper img {
   height: 380px;
   position: absolute;
   width: 380px;
 }
-/* line 79, ../src/style.css.scss */
+/* line 74, ../src/style.css.scss */
 .wrapper #slideshow-wrapper div {
   display: none;
 }
-/* line 83, ../src/style.css.scss */
+/* line 78, ../src/style.css.scss */
 .wrapper #slideshow-wrapper p {
   background-color: #fff;
   position: absolute;
   top: 0;
   left: 0;
+  z-index: 1;
 }
-/* line 94, ../src/style.css.scss */
+/* line 89, ../src/style.css.scss */
 .wrapper #toggle {
   background-color: #efefef;
   cursor: pointer;
@@ -509,7 +510,7 @@ body {
   margin-top: 5px;
   text-align: center;
 }
-/* line 106, ../src/style.css.scss */
+/* line 101, ../src/style.css.scss */
 .wrapper #next {
   background-color: #fff;
   bottom: 195px;
@@ -519,7 +520,7 @@ body {
   right: 0;
   z-index: 10;
 }
-/* line 118, ../src/style.css.scss */
+/* line 113, ../src/style.css.scss */
 .wrapper #previous {
   background-color: #fff;
   bottom: 195px;
@@ -529,7 +530,7 @@ body {
   position: absolute;
   z-index: 9;
 }
-/* line 130, ../src/style.css.scss */
+/* line 125, ../src/style.css.scss */
 .wrapper #thumb-wrapper {
   height: 95px;
   margin-top: 5px;
@@ -541,13 +542,13 @@ body {
   display: table;
   clear: both;
 }
-/* line 139, ../src/style.css.scss */
+/* line 134, ../src/style.css.scss */
 .wrapper #thumb-wrapper div {
   margin: 0;
   padding: 0;
   float: left;
 }
-/* line 145, ../src/style.css.scss */
+/* line 140, ../src/style.css.scss */
 .wrapper #thumb-wrapper img {
   margin: 0;
   padding: 0;

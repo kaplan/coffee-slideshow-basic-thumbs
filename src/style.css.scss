@@ -41,14 +41,10 @@ html {
   }
 }
 
-
 body {
   font-family: "Helvetica Neue";
   padding: 10px;
 }
-
-
-
 
 .wrapper {
   margin: 0 auto;
@@ -60,7 +56,6 @@ body {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-
 
 
   #slideshow-wrapper {
@@ -86,7 +81,7 @@ body {
       top: 0;
       left: 0;
       // LOOK INTO whether or not you need the z-index on captions.
-      // z-index: 10;
+      z-index: 1;
     }
   }
 

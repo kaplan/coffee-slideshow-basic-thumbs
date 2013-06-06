@@ -5,6 +5,8 @@ This is the next step in the basic slideshow, no libraries, but using thumbnail 
 
 Super basic like the [previous version](https://github.com/kaplan/coffee-slideshow-basic), using the pretty much the same files and setup. CoffeeScript and understanding what's going on underneath a framework or an (as best I can) is the primary focus here.
 
+Here's a link for the working example of the [Slideshow with Thumbs](http://workalicious.com/dev/slideshows/coffee-slideshow-basic-thumbs/)
+
 More Details
 ------------
 This version of the slideshow is built on the original non-thumb one Somewhat fewer comments as a guide for myself in this version, thought being I can always go back to the original-original for reference, which I seem to do with lots of stuff. Just like the original I'm trying to do as much plain JavaScript through learning CoffeeScript as I can, later libraries.

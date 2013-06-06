@@ -110,6 +110,7 @@ this.STUDIO.slideshow = (function() {
     console.log("+++ runSlideshow called +++");
     console.log("curImage is " + curImage);
     console.log("next image is: " + photos[(curImage + 1) % slides.length].alt);
+    toggle.innerHTML = "Slideshow is playing, &#9785; Pause it.";
     slides[(curImage + 1) % slides.length].style.visibility = 'visible';
     setOpacity(slides[(curImage + 1) % slides.length], 100);
     console.log("slideshowTimeout ID: " + slideshowTimeout);
@@ -180,7 +181,8 @@ this.STUDIO.slideshow = (function() {
     slides[thumbId].style.visibility = 'visible';
     setOpacity(slides[thumbId], 100);
     fadeOutSlideAdvance(slides[curImage % slides.length], 100);
-    return curImage = parseInt(thumbId, 10);
+    curImage = parseInt(thumbId, 10);
+    return clearTimeout(slideshowTimeout);
   };
   reorderLayerStack = function() {
     var shuffle, slide, _i, _len;

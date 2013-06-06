@@ -41,6 +41,7 @@ addLoadEvent = (func) ->
 @STUDIO.slideshow = do ->
 
   # private
+  # -------
 
   slideshow = slides = photos = thumbset = thumbs = toggle = next = prev = "unknown"
   curImage = slideCount = totalImageCount = loadedSlideCount = 0
@@ -138,6 +139,8 @@ addLoadEvent = (func) ->
     console.log "+++ runSlideshow called +++"
     console.log "curImage is #{curImage}"
     console.log "next image is: #{photos[(curImage + 1) % slides.length].alt}"
+
+    toggle.innerHTML = "Slideshow is playing, &#9785; Pause it."
 
     # SETTINGS ON NEXT IMAGE IN STACK
     # make the next image in the stack visible (look in the top from some modulus info, which you always forget)
@@ -241,9 +244,7 @@ addLoadEvent = (func) ->
     # tip: you can also convert by taking a string and multiplying by 1 as in "2" * 1
     curImage = parseInt(thumbId, 10)
 
-    # if you want to keep the slideshow playing after clicking to advance clearTimeout for calling it
-    # because you call runSlideshow again with a new timeout in the complete on fadeOutSlideAdvance
-    # clearTimeout slideshowTimeout
+    clearTimeout slideshowTimeout
 
 
   reorderLayerStack = ->
@@ -254,6 +255,7 @@ addLoadEvent = (func) ->
       slides[_i].style.zIndex = (((slides.length) - _i) + curImage) % slides.length
     shuffle slide for slide in slides
     return true
+
 
   # public
   # ------
