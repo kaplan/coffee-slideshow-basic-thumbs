@@ -40,25 +40,33 @@
 
         </div> <!-- end #slideshow-wrapper -->
 
-        <div id="next" onclick="STUDIO.slideshow.nextSlide()"></div>
-        <div id="previous" onclick="STUDIO.slideshow.prevSlide()"></div>
+        <div id="next"></div>
+        <div id="previous"></div>
 
         <div id="thumb-wrapper">
           <div>
-            <img src="images/beercan-image-a.jpg" alt="image 00"/>
+            <a href="images/beercan-image-a.jpg" data-slideshow-id="0">
+              <img src="images/beercan-image-a.jpg" alt="image 00"/>
+            </a>
           </div>
           <div>
-            <img src="images/beercan-image-b.jpg" alt="image 01"/>
+            <a href="images/beercan-image-b.jpg" data-slideshow-id="1">
+              <img src="images/beercan-image-b.jpg" alt="image 01"/>
+            </a>
           </div>
           <div>
-            <img src="images/beercan-image-c.jpg" alt="image 02"/>
+            <a href="images/beercan-image-c.jpg" data-slideshow-id="2">
+              <img src="images/beercan-image-c.jpg" alt="image 02"/>
+            </a>
           </div>
           <div>
-            <img src="images/beercan-image-d.jpg" alt="image 03"/>
+            <a href="images/beercan-image-d.jpg" data-slideshow-id="3">
+              <img src="images/beercan-image-d.jpg" alt="image 03"/>
+            </a>
           </div>
         </div>
 
-        <div id="toggle" onclick="STUDIO.slideshow.pauseSlideshow()">Play &#9787; Pause</div>
+        <div id="toggle">Play &#9787; Pause</div>
 
       </div>
 

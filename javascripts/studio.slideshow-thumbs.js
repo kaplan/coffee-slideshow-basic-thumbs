@@ -4,16 +4,23 @@
 Slideshow Application
 ========================================================================================================
 
-Description:  Basic slideshow with thumbnail images fading with controls sans library (why? idk)
+Description: Basic slideshow with thumbnail images fading with controls sans library (why? idk)
+
+Neat stuff: There is also a Rake file you can run in the Terminal to start the watch on the scss and coffeescript. I'm not sure what the last parts are, I should find out more. The Rake comes from a great post, by Nick Quaranto: http://quaran.to/blog/2013/01/09/use-jekyll-scss-coffeescript-without-plugins/
 
 Dependencies: Modernizr, for js detection
 
 Version:      1.0
 Created:      2013-06-05
-Last Mod:
+Last Mod:     2013-06-06
 
-Notes:
+Notes: This version of the slideshow is built on the original non-thumb one ( https://github.com/kaplan/coffee-slideshow-basic ). Somewhat fewer comments as a guide for myself in this version, thought being I can always go back to the original-original for reference, which I seem to do with lots of stuff. Just like the original I'm trying to do as much plain JavaScript through learning CoffeeScript as I can, later libraries.
 
+The thumbs have a custom attribute, data-, that is pretty neat for semantic markup that you can use in your JavaScript. The ones used here are very simple, just an id for the thumb/slide that will help in setting the current image. If you look at the very bottom I have a little explaination copied from the HTML5Doctor page: http://html5doctor.com/html5-custom-data-attributes/ where I learned about these.
+
+Working on make the JavaScript unobtrusive: I started to pull out the eventhandlers from the markup, removed the onclick="STUDIO.slideshow.pauseSlideshow()" from the toggle, next and prev. Those are now in here, where they should be for the separation between structure and behavior.
+
+Next: I'd like to add some better or more clear documentation for the methods and properties and begin really eleminating and comments or console.logs. At this point it's very handy for me to watch the Browser's console log to see what the application is doing. In the end the comments don't compile into the JavaScript from CoffeeScript and I think that's one of my favorite things about CS. My JavaScript files were a mess with commented out logs and notes that I would leave out of fear of forgetting what I was doing, but it made for a very littered looking code, not at all crafsman like. Maybe it's the quality of my comments and the fact I try different snippets within before I settle on an approach... anyway enough rambling.
 ========================================================================================================
 */
 
@@ -36,9 +43,9 @@ addLoadEvent = function(func) {
 this.STUDIO = (_ref = this.STUDIO) != null ? _ref : {};
 
 this.STUDIO.slideshow = (function() {
-  var curImage, fadeInContainer, fadeInContainerTimeout, fadeInObject, fadeOutSlide, fadeOutSlideAdvance, fadeOutTimeout, loadedSlideCount, next, onImageLoad, photos, playback, prev, reorderLayerStack, runSlideshow, setOpacity, setVisibilityForAdvance, slideCount, slides, slideshow, slideshowPaused, slideshowTimeout, thumbs, totalImageCount;
+  var curImage, fadeInContainer, fadeInContainerTimeout, fadeInObject, fadeOutSlide, fadeOutSlideAdvance, fadeOutTimeout, loadedSlideCount, next, onImageLoad, photos, prev, reorderLayerStack, runSlideshow, setOpacity, setVisibilityForAdvance, showSlideOnThumbClick, slideCount, slides, slideshow, slideshowPaused, slideshowTimeout, thumbs, thumbset, toggle, totalImageCount;
 
-  slideshow = slides = photos = thumbs = playback = next = prev = "unknown";
+  slideshow = slides = photos = thumbset = thumbs = toggle = next = prev = "unknown";
   curImage = slideCount = totalImageCount = loadedSlideCount = 0;
   fadeInContainerTimeout = slideshowTimeout = fadeOutTimeout = null;
   slideshowPaused = false;
@@ -47,18 +54,15 @@ this.STUDIO.slideshow = (function() {
 
     slides[slideOrder].style.display = "block";
     loadedSlideCount++;
-    console.log("loading an image " + slideOrder);
-    console.log("loadedSlideCount is " + loadedSlideCount);
     if (totalImageCount === loadedSlideCount) {
       console.log("+ ================== +");
       console.log("+ ALL IMAGES LOADED! +");
       console.log("+ ================== +");
       fadeInContainerTimeout = setTimeout(function() {
-        console.log("!! ALL IMAGES LOADED: FADE IN THE SLIDESHOW CONTAINER !!");
         return fadeInContainer(slideshow, 0, 500);
       });
       return fadeInThumbs = setTimeout(function() {
-        return fadeInObject(thumbs, 0, 500);
+        return fadeInObject(thumbset, 0, 500);
       });
     }
   };
@@ -79,8 +83,7 @@ this.STUDIO.slideshow = (function() {
         return fadeInObject(obj, opacity, 200);
       });
     } else {
-      clearTimeout(fadeInObjectTimeout);
-      return console.log('*** done with fadeInObject ***');
+      return clearTimeout(fadeInObjectTimeout);
     }
   };
   fadeInContainer = function(obj, opacity) {
@@ -93,12 +96,12 @@ this.STUDIO.slideshow = (function() {
         return fadeInContainer(obj, opacity, 200);
       });
     } else {
-      console.log("+++ fadeInContainer complete +++");
       clearTimeout(fadeInTimeout);
       clearTimeout(fadeInContainerTimeout);
       return slideshowTimeout = setTimeout(function() {
         console.log("*** slideshow playing, first time start ***");
         runSlideshow();
+        toggle.innerHTML = "Slideshow is playing, &#9785; Pause it.";
         return slideshowPaused = false;
       }, 4000);
     }
@@ -135,13 +138,12 @@ this.STUDIO.slideshow = (function() {
       }
     }
   };
-  fadeOutSlideAdvance = function(obj, opacity, direction) {
+  fadeOutSlideAdvance = function(obj, opacity) {
     var shuffle, slide, _i, _len;
 
     if (opacity >= 0) {
-      console.log("fade out slide " + opacity);
       setOpacity(obj, opacity);
-      opacity -= 2;
+      opacity -= 10;
       return fadeOutTimeout = setTimeout(function() {
         return fadeOutSlideAdvance(obj, opacity, 10);
       });
@@ -167,11 +169,18 @@ this.STUDIO.slideshow = (function() {
       case next:
         return slides[(curImage + 1) % slides.length].style.visibility = 'visible';
       case prev:
-        console.log((curImage - 1) % slides.length);
         return slides[(curImage - 1) % slides.length].style.visibility = 'visible';
       default:
         break;
     }
+  };
+  showSlideOnThumbClick = function(thumbId) {
+    console.log("+++ thumb " + thumbId + " clicked +++");
+    console.log("curImage is " + curImage);
+    slides[thumbId].style.visibility = 'visible';
+    setOpacity(slides[thumbId], 100);
+    fadeOutSlideAdvance(slides[curImage % slides.length], 100);
+    return curImage = parseInt(thumbId, 10);
   };
   reorderLayerStack = function() {
     var shuffle, slide, _i, _len;
@@ -187,7 +196,7 @@ this.STUDIO.slideshow = (function() {
   };
   return {
     initSlides: function(slideWrapper) {
-      var fadeInTimeout, i, slide, _i, _len;
+      var fadeInTimeout, i, link, slide, _i, _len;
 
       console.log("+++ initSlides called +++");
       curImage = 0;
@@ -195,26 +204,43 @@ this.STUDIO.slideshow = (function() {
       slideshow = document.getElementById(slideWrapper);
       slides = slideshow.getElementsByTagName("div");
       photos = slideshow.getElementsByTagName("img");
-      thumbs = document.getElementById("thumb-wrapper");
+      thumbset = document.getElementById("thumb-wrapper");
+      thumbs = thumbset.getElementsByTagName("img");
       totalImageCount = photos.length;
       next = document.getElementById("next");
       next.innerHTML = "next &#10095;";
       next.name = "NEXT";
+      next.onclick = function() {
+        return STUDIO.slideshow.nextSlide();
+      };
       prev = document.getElementById("previous");
       prev.innerHTML = "&#10094; prev";
       prev.name = "PREV";
-      playback = document.getElementById("toggle");
+      prev.onclick = function() {
+        return STUDIO.slideshow.prevSlide();
+      };
+      toggle = document.getElementById("toggle");
+      toggle.onclick = function() {
+        return STUDIO.slideshow.pauseSlideshow();
+      };
       setOpacity(slideshow, 50);
       for (_i = 0, _len = slides.length; _i < _len; _i++) {
         slide = slides[_i];
         slide.style.zIndex = (slides.length - 1) - _i;
         setOpacity(slide, 20);
         slide.style.visibility = 'hidden';
+        link = thumbs[_i].parentNode;
+        link.onclick = function() {
+          this.slideId = parseInt(this.dataset.slideshowId, 10);
+          console.log(this.slideId);
+          if (curImage !== this.slideId) {
+            showSlideOnThumbClick(this.slideId);
+          }
+          return false;
+        };
       }
       setOpacity(slides[0], 100);
       slides[0].style.visibility = 'visible';
-      console.log("totalImageCount is " + totalImageCount);
-      console.log("loadedSlideCount is " + loadedSlideCount);
       if (totalImageCount === loadedSlideCount) {
         console.log("+ ================== +");
         console.log("+ IMAGES WERE CACHED +");
@@ -223,7 +249,6 @@ this.STUDIO.slideshow = (function() {
           return fadeInContainer(obj, opacity, 20);
         });
       } else {
-        console.log("load a slide image");
         i = 0;
         while (i < totalImageCount) {
           photos[i].onLoad = onImageLoad(i);
@@ -237,21 +262,22 @@ this.STUDIO.slideshow = (function() {
         console.log("slideshow paused");
         clearTimeout(slideshowTimeout);
         slideshowPaused = true;
-        return playback.innerHTML = "Slideshow is paused, &#9787; Play it.";
+        return toggle.innerHTML = "Slideshow is paused, &#9787; Play it.";
       } else {
         console.log("slideshow playing");
         runSlideshow();
         slideshowPaused = false;
-        return playback.innerHTML = "Slideshow is playing, &#9785; Pause it.";
+        return toggle.innerHTML = "Slideshow is playing, &#9785; Pause it.";
       }
     },
     nextSlide: function() {
       console.log("+++ next slide button clicked +++");
+      console.log("curImage is " + curImage);
       clearTimeout(slideshowTimeout);
       setVisibilityForAdvance(next);
       clearTimeout(fadeOutTimeout);
       setOpacity(slides[(curImage + 1) % slides.length], 100);
-      fadeOutSlideAdvance(slides[curImage % slides.length], 100, next);
+      fadeOutSlideAdvance(slides[curImage % slides.length], 100);
       curImage++;
       if (curImage % slides.length === 0) {
         return curImage = 0;
@@ -267,8 +293,17 @@ this.STUDIO.slideshow = (function() {
       }
       setVisibilityForAdvance(prev);
       setOpacity(slides[(curImage - 1) % slides.length], 100);
-      fadeOutSlideAdvance(slides[curImage % slides.length], 100, prev);
+      fadeOutSlideAdvance(slides[curImage % slides.length], 100);
       return curImage--;
+    },
+    getCurImage: function() {
+      return curImage;
+    },
+    getSlideId: function(id) {
+      var thumbId;
+
+      thumbId = thumbs[id].parentNode.dataset.slideshowId;
+      return thumbId;
     }
   };
 })();
