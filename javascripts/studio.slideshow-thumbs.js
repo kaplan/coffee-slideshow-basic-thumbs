@@ -43,7 +43,7 @@ addLoadEvent = function(func) {
 this.STUDIO = (_ref = this.STUDIO) != null ? _ref : {};
 
 this.STUDIO.slideshow = (function() {
-  var curImage, fadeInContainer, fadeInContainerTimeout, fadeInObject, fadeOutSlide, fadeOutSlideAdvance, fadeOutTimeout, loadedSlideCount, next, onImageLoad, photos, prev, reorderLayerStack, runSlideshow, setOpacity, setVisibilityForAdvance, showSlideOnThumbClick, slideCount, slides, slideshow, slideshowPaused, slideshowTimeout, thumbs, thumbset, toggle, totalImageCount;
+  var curImage, fadeInContainer, fadeInContainerTimeout, fadeInObject, fadeOutSlide, fadeOutSlideAdvance, fadeOutTimeout, loadedSlideCount, next, onImageLoad, photos, prev, reorderLayerStack, runSlideshow, setOpacity, setThumbStates, setVisibilityForAdvance, showSlideOnThumbClick, slideCount, slides, slideshow, slideshowPaused, slideshowTimeout, thumbs, thumbset, toggle, totalImageCount;
 
   slideshow = slides = photos = thumbset = thumbs = toggle = next = prev = "unknown";
   curImage = slideCount = totalImageCount = loadedSlideCount = 0;
@@ -62,6 +62,7 @@ this.STUDIO.slideshow = (function() {
         return fadeInContainer(slideshow, 0, 500);
       });
       return fadeInThumbs = setTimeout(function() {
+        setThumbStates(curImage);
         return fadeInObject(thumbset, 0, 500);
       });
     }
@@ -113,6 +114,7 @@ this.STUDIO.slideshow = (function() {
     toggle.innerHTML = "Slideshow is playing, &#9785; Pause it.";
     slides[(curImage + 1) % slides.length].style.visibility = 'visible';
     setOpacity(slides[(curImage + 1) % slides.length], 100);
+    setThumbStates((curImage + 1) % slides.length);
     console.log("slideshowTimeout ID: " + slideshowTimeout);
     clearTimeout(slideshowTimeout);
     console.log("slideshowTimeout ID: " + slideshowTimeout);
@@ -168,9 +170,11 @@ this.STUDIO.slideshow = (function() {
     console.log("+++ setVisibilityForAdvance called: slide advance direction " + direction.name + " +++");
     switch (direction) {
       case next:
-        return slides[(curImage + 1) % slides.length].style.visibility = 'visible';
+        slides[(curImage + 1) % slides.length].style.visibility = 'visible';
+        return setThumbStates((curImage + 1) % slides.length);
       case prev:
-        return slides[(curImage - 1) % slides.length].style.visibility = 'visible';
+        slides[(curImage - 1) % slides.length].style.visibility = 'visible';
+        return setThumbStates((curImage - 1) % slides.length);
       default:
         break;
     }
@@ -178,11 +182,22 @@ this.STUDIO.slideshow = (function() {
   showSlideOnThumbClick = function(thumbId) {
     console.log("+++ thumb " + thumbId + " clicked +++");
     console.log("curImage is " + curImage);
+    setThumbStates(thumbId);
     slides[thumbId].style.visibility = 'visible';
     setOpacity(slides[thumbId], 100);
     fadeOutSlideAdvance(slides[curImage % slides.length], 100);
     curImage = parseInt(thumbId, 10);
     return clearTimeout(slideshowTimeout);
+  };
+  setThumbStates = function(thumbId) {
+    var thumb, _i, _len;
+
+    console.log("*** change state thumb " + thumbId + " clicked ***");
+    for (_i = 0, _len = thumbs.length; _i < _len; _i++) {
+      thumb = thumbs[_i];
+      setOpacity(thumbs[_i], 50);
+    }
+    return setOpacity(thumbs[thumbId], 100);
   };
   reorderLayerStack = function() {
     var shuffle, slide, _i, _len;
@@ -233,6 +248,7 @@ this.STUDIO.slideshow = (function() {
         slide.style.visibility = 'hidden';
         link = thumbs[_i].parentNode;
         link.onclick = function() {
+          console.log("" + this);
           this.slideId = parseInt(this.dataset.slideshowId, 10);
           console.log(this.slideId);
           if (curImage !== this.slideId) {

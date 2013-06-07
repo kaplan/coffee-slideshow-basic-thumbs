@@ -73,6 +73,7 @@ addLoadEvent = (func) ->
         fadeInContainer slideshow, 0, 500)
 
       fadeInThumbs = setTimeout(->
+        setThumbStates(curImage)
         fadeInObject thumbset, 0, 500)
 
 
@@ -148,6 +149,9 @@ addLoadEvent = (func) ->
     slides[(curImage + 1) % slides.length].style.visibility = 'visible'
     setOpacity(slides[(curImage + 1) % slides.length], 100)
 
+    # Set the visual state on the thumb for the active slide
+    setThumbStates((curImage + 1) % slides.length)
+
     # clear the timeout that called this method
     console.log "slideshowTimeout ID: #{slideshowTimeout}"
     clearTimeout slideshowTimeout
@@ -220,9 +224,13 @@ addLoadEvent = (func) ->
     switch direction
       when next
         slides[(curImage + 1) % slides.length].style.visibility = 'visible'
+        # Set the visual state on the thumb for the active slide
+        setThumbStates((curImage + 1) % slides.length)
       when prev
         # console.log (curImage - 1) % slides.length
         slides[(curImage - 1) % slides.length].style.visibility = 'visible'
+        # Set the visual state on the thumb for the active slide
+        setThumbStates((curImage - 1) % slides.length)
       else
         break
 
@@ -230,6 +238,9 @@ addLoadEvent = (func) ->
   showSlideOnThumbClick = (thumbId) ->
     console.log "+++ thumb #{thumbId} clicked +++"
     console.log "curImage is #{curImage}"
+
+    # change the visual state of the thumb
+    setThumbStates(thumbId)
 
     # make sure the slide you are about to reveal is visible
     slides[thumbId].style.visibility = 'visible'
@@ -246,11 +257,18 @@ addLoadEvent = (func) ->
 
     clearTimeout slideshowTimeout
 
+  setThumbStates = (thumbId) ->
+    console.log "*** change state thumb #{thumbId} clicked ***"
+    # console.log thumbs.length
+    for thumb in thumbs
+      # console.log thumbs[_i]
+      setOpacity(thumbs[_i], 50)
+    setOpacity(thumbs[thumbId], 100)
+
 
   reorderLayerStack = ->
     # console.log "+++ shuffle z-index +++"
     # console.log "+++ shuffle z-index: #{slides.length} +++"
-
     shuffle = ->
       slides[_i].style.zIndex = (((slides.length) - _i) + curImage) % slides.length
     shuffle slide for slide in slides
@@ -319,11 +337,10 @@ addLoadEvent = (func) ->
       # attach a handler to the link elememt
       link.onclick = ->
       # thumbs[_i].parentNode.onclick = ->
-        # console.log "#{this}"
+        console.log "#{this}"
         # console.log this.dataset.slideshowId
         this.slideId = parseInt(this.dataset.slideshowId, 10)
         console.log this.slideId
-
         showSlideOnThumbClick(this.slideId) unless curImage is this.slideId
         return false # prevent default behavior of clicking link
 
