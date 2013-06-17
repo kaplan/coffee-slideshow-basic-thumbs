@@ -249,7 +249,7 @@ this.STUDIO.slideshow = (function() {
         link = thumbs[_i].parentNode;
         link.onclick = function() {
           console.log("" + this);
-          this.slideId = parseInt(this.dataset.slideshowId, 10);
+          this.slideId = parseInt(this.getAttribute('data-slideshow-id'), 10);
           console.log(this.slideId);
           if (curImage !== this.slideId) {
             showSlideOnThumbClick(this.slideId);
@@ -320,7 +320,7 @@ this.STUDIO.slideshow = (function() {
     getSlideId: function(id) {
       var thumbId;
 
-      thumbId = thumbs[id].parentNode.dataset.slideshowId;
+      thumbId = thumbs[id].parentNode.getAttribute('data-slideshow-id');
       return thumbId;
     }
   };

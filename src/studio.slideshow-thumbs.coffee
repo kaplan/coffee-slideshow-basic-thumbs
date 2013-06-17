@@ -339,7 +339,11 @@ addLoadEvent = (func) ->
       # thumbs[_i].parentNode.onclick = ->
         console.log "#{this}"
         # console.log this.dataset.slideshowId
-        this.slideId = parseInt(this.dataset.slideshowId, 10)
+
+        # IE doesn't like the dataset. method that modern browsers allow, so you need to use getAttributes
+        # this.slideId = parseInt(this.dataset.slideshowId, 10)
+        this.slideId = parseInt(this.getAttribute('data-slideshow-id'), 10)
+
         console.log this.slideId
         showSlideOnThumbClick(this.slideId) unless curImage is this.slideId
         return false # prevent default behavior of clicking link
@@ -458,7 +462,7 @@ addLoadEvent = (func) ->
   # DATASET element attributes that can be totally customized in markup that you can to pass into JS
   # This was studied for using an "id" within the thumb markup instead of a class or id attribute
 
-  # MODERN BROWSERS can use dataset, check caniuse.com
+  # MODERN BROWSERS (do not include IE any verison as MODERN!) can use dataset, check caniuse.com
   # <div id='sunflower' data-leaves='47' data-plant-height='2.4m'></div>
   # // 'Getting' data-attributes using dataset
   # var plant = document.getElementById('sunflower');
@@ -480,7 +484,11 @@ addLoadEvent = (func) ->
 
   # <a href="images/beercan-image-a.jpg" data-slideshow-id="0">
   getSlideId: (id) ->
-    # 'Getting' data-attributes using dataset
-    thumbId = thumbs[id].parentNode.dataset.slideshowId
+    # 'Getting' data-attributes using dataset, but IE doesn't like dataset approach
+    # so you have to use the older .getAttribute approach
+
+    # thumbId = thumbs[id].parentNode.dataset.slideshowId
+    thumbId = thumbs[id].parentNode.getAttribute('data-slideshow-id')
+
     return thumbId
 
